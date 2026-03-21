@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { useCore4Data } from '@/lib/mockData';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { useGoals } from '@/hooks/useGoals';
+import { useCore4Progress } from '@/hooks/useCore4Progress';
 import { useWHOOP } from '@/hooks/useWHOOP';
 import { useTargets, type TargetMetric } from '@/hooks/useTargets';
 import { Button } from '@/components/common/Button';
@@ -10,34 +10,145 @@ import { Input } from '@/components/common/Input';
 import { Core4Grid } from '@/components/core4/Core4Grid';
 
 const BODYWEIGHT_STORAGE_KEY = 'core4_bodyweight';
+const BODYWEIGHT_STORAGE_EVENT = 'core4-bodyweight-change';
+const CURRENT_VALUES_STORAGE_KEY = 'core4_current_values';
+const CURRENT_VALUES_STORAGE_EVENT = 'core4-current-values-change';
+
+type ManualMetric = Exclude<TargetMetric, 'fitness'>;
+
+interface Core4CurrentValues {
+  flow: string | null;
+  family: string | null;
+  finance: string | null;
+}
+
+const DEFAULT_CURRENT_VALUES: Core4CurrentValues = {
+  flow: null,
+  family: null,
+  finance: null,
+};
+
+function parseCurrentValues(value: string | null): Core4CurrentValues {
+  if (!value) {
+    return { ...DEFAULT_CURRENT_VALUES };
+  }
+
+  try {
+    const parsed = JSON.parse(value) as Partial<Core4CurrentValues>;
+    return {
+      flow: parsed.flow ?? null,
+      family: parsed.family ?? null,
+      finance: parsed.finance ?? null,
+    };
+  } catch {
+    return { ...DEFAULT_CURRENT_VALUES };
+  }
+}
 
 function useBodyweight() {
-  const [bodyweight, setBodyweightState] = useState<string>(() => {
+  const subscribe = (callback: () => void) => {
     if (typeof window === 'undefined') {
-      return '';
+      return () => undefined;
     }
 
-    return window.localStorage.getItem(BODYWEIGHT_STORAGE_KEY) ?? '';
-  });
+    const handleStorage = (event: Event) => {
+      if (event instanceof StorageEvent && event.key && event.key !== BODYWEIGHT_STORAGE_KEY) {
+        return;
+      }
+
+      callback();
+    };
+
+    window.addEventListener('storage', handleStorage);
+    window.addEventListener(BODYWEIGHT_STORAGE_EVENT, handleStorage);
+
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      window.removeEventListener(BODYWEIGHT_STORAGE_EVENT, handleStorage);
+    };
+  };
+
+  const bodyweight = useSyncExternalStore(
+    subscribe,
+    () => (typeof window === 'undefined' ? '' : window.localStorage.getItem(BODYWEIGHT_STORAGE_KEY) ?? ''),
+    () => ''
+  );
 
   const saveBodyweight = (value: string) => {
     const nextValue = value.trim();
-    setBodyweightState(nextValue);
 
     if (nextValue) {
       window.localStorage.setItem(BODYWEIGHT_STORAGE_KEY, nextValue);
-      return;
+    } else {
+      window.localStorage.removeItem(BODYWEIGHT_STORAGE_KEY);
     }
 
-    window.localStorage.removeItem(BODYWEIGHT_STORAGE_KEY);
+    window.dispatchEvent(new Event(BODYWEIGHT_STORAGE_EVENT));
   };
 
   const clearBodyweight = () => {
-    setBodyweightState('');
     window.localStorage.removeItem(BODYWEIGHT_STORAGE_KEY);
+    window.dispatchEvent(new Event(BODYWEIGHT_STORAGE_EVENT));
   };
 
   return { bodyweight, saveBodyweight, clearBodyweight };
+}
+
+function useCurrentValues() {
+  const subscribe = (callback: () => void) => {
+    if (typeof window === 'undefined') {
+      return () => undefined;
+    }
+
+    const handleStorage = (event: Event) => {
+      if (event instanceof StorageEvent && event.key && event.key !== CURRENT_VALUES_STORAGE_KEY) {
+        return;
+      }
+
+      callback();
+    };
+
+    window.addEventListener('storage', handleStorage);
+    window.addEventListener(CURRENT_VALUES_STORAGE_EVENT, handleStorage);
+
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      window.removeEventListener(CURRENT_VALUES_STORAGE_EVENT, handleStorage);
+    };
+  };
+
+  const getSnapshot = () => {
+    if (typeof window === 'undefined') {
+      return { ...DEFAULT_CURRENT_VALUES };
+    }
+
+    return parseCurrentValues(window.localStorage.getItem(CURRENT_VALUES_STORAGE_KEY));
+  };
+
+  const currentValues = useSyncExternalStore(subscribe, getSnapshot, () => ({ ...DEFAULT_CURRENT_VALUES }));
+
+  const setCurrentValue = (metric: ManualMetric, value: string) => {
+    const nextValue = value.trim();
+    const nextValues = {
+      ...currentValues,
+      [metric]: nextValue || null,
+    };
+
+    window.localStorage.setItem(CURRENT_VALUES_STORAGE_KEY, JSON.stringify(nextValues));
+    window.dispatchEvent(new Event(CURRENT_VALUES_STORAGE_EVENT));
+  };
+
+  const clearCurrentValue = (metric: ManualMetric) => {
+    const nextValues = {
+      ...currentValues,
+      [metric]: null,
+    };
+
+    window.localStorage.setItem(CURRENT_VALUES_STORAGE_KEY, JSON.stringify(nextValues));
+    window.dispatchEvent(new Event(CURRENT_VALUES_STORAGE_EVENT));
+  };
+
+  return { currentValues, setCurrentValue, clearCurrentValue };
 }
 
 const GoalsSection: React.FC = () => {
@@ -173,38 +284,90 @@ const WHOOPPanel: React.FC = () => {
 };
 
 export default function Core4Page() {
-  const core4Data = useCore4Data();
-  const whoop = useWHOOP();
   const { targets, setTarget, clearTarget } = useTargets();
   const { bodyweight, saveBodyweight, clearBodyweight } = useBodyweight();
+  const { currentValues, setCurrentValue, clearCurrentValue } = useCurrentValues();
   const [, setSelectedMetric] = useState<string | null>(null);
   const [draftTargets, setDraftTargets] = useState<Record<TargetMetric, string>>({
-    fitness: targets.fitness ?? '',
-    flow: targets.flow ?? '',
-    family: targets.family ?? '',
-    finance: targets.finance ?? '',
+    fitness: '',
+    flow: '',
+    family: '',
+    finance: '',
   });
-  const [bodyweightDraft, setBodyweightDraft] = useState(bodyweight);
-
-  const enhancedCore4Data = core4Data.map((metric) => {
-    if (metric.title !== 'Fitness') {
-      return metric;
-    }
-
-    const recoveryValue = Number.parseInt(whoop.recovery.replace('%', ''), 10);
-
-    return {
-      ...metric,
-      value: whoop.isLoading ? '—' : whoop.fitnessScore,
-      unit: 'Body Score',
-      progress: Number.isFinite(recoveryValue) ? recoveryValue : metric.progress,
-    };
+  const [draftCurrentValues, setDraftCurrentValues] = useState<Record<ManualMetric, string>>({
+    flow: '',
+    family: '',
+    finance: '',
   });
+  const [bodyweightDraft, setBodyweightDraft] = useState('');
 
-  const fitnessDetails = [
-    { label: 'Recovery', value: whoop.isLoading ? 'Loading' : whoop.recovery },
-    { label: 'Activity', value: whoop.isLoading ? 'Loading' : whoop.strain },
-    { label: 'Bodyweight', value: bodyweight ? `${bodyweight} lb` : 'Set bodyweight' },
+  useEffect(() => {
+    setDraftTargets({
+      fitness: targets.fitness ?? '',
+      flow: targets.flow ?? '',
+      family: targets.family ?? '',
+      finance: targets.finance ?? '',
+    });
+  }, [targets]);
+
+  useEffect(() => {
+    setBodyweightDraft(bodyweight);
+  }, [bodyweight]);
+
+  useEffect(() => {
+    setDraftCurrentValues({
+      flow: currentValues.flow ?? '',
+      family: currentValues.family ?? '',
+      finance: currentValues.finance ?? '',
+    });
+  }, [currentValues]);
+
+  const fitnessProgress = useCore4Progress('fitness', targets.fitness, undefined, bodyweight);
+  const flowProgress = useCore4Progress('flow', targets.flow, currentValues.flow);
+  const familyProgress = useCore4Progress('family', targets.family, currentValues.family);
+  const financeProgress = useCore4Progress('finance', targets.finance, currentValues.finance);
+
+  const enhancedCore4Data = [
+    {
+      title: 'Fitness' as const,
+      value: fitnessProgress.valueLabel,
+      unit: fitnessProgress.unit,
+      progress: fitnessProgress.progress,
+      color: fitnessProgress.color,
+      statusLabel: fitnessProgress.statusLabel,
+      target: targets.fitness,
+      details: fitnessProgress.details,
+    },
+    {
+      title: 'Flow' as const,
+      value: flowProgress.valueLabel,
+      unit: flowProgress.unit,
+      progress: flowProgress.progress,
+      color: flowProgress.color,
+      statusLabel: flowProgress.statusLabel,
+      target: targets.flow,
+      details: flowProgress.details,
+    },
+    {
+      title: 'Family' as const,
+      value: familyProgress.valueLabel,
+      unit: familyProgress.unit,
+      progress: familyProgress.progress,
+      color: familyProgress.color,
+      statusLabel: familyProgress.statusLabel,
+      target: targets.family,
+      details: familyProgress.details,
+    },
+    {
+      title: 'Finance' as const,
+      value: financeProgress.valueLabel,
+      unit: financeProgress.unit,
+      progress: financeProgress.progress,
+      color: financeProgress.color,
+      statusLabel: financeProgress.statusLabel,
+      target: targets.finance,
+      details: financeProgress.details,
+    },
   ];
 
   const targetFields: Array<{
@@ -216,6 +379,16 @@ export default function Core4Page() {
     { metric: 'flow', label: 'Flow target', placeholder: '50 Flow tasks' },
     { metric: 'family', label: 'Family target', placeholder: '3x family dinners/week' },
     { metric: 'finance', label: 'Finance target', placeholder: '$500K ARR' },
+  ];
+
+  const currentValueFields: Array<{
+    metric: ManualMetric;
+    label: string;
+    placeholder: string;
+  }> = [
+    { metric: 'flow', label: 'Flow current value', placeholder: '35' },
+    { metric: 'family', label: 'Family current value', placeholder: '8' },
+    { metric: 'finance', label: 'Finance current value', placeholder: '$125000' },
   ];
 
   return (
@@ -235,8 +408,6 @@ export default function Core4Page() {
         </h2>
         <Core4Grid
           data={enhancedCore4Data}
-          targets={targets}
-          fitnessDetails={fitnessDetails}
           onCardClick={(m) => setSelectedMetric(m.title)}
         />
       </section>
@@ -287,7 +458,7 @@ export default function Core4Page() {
                 90 Day Targets
               </h3>
               <p className="font-mono text-[9px] uppercase tracking-widest text-on-surface/30">
-                Set and display targets only. Tracking comes in Phase 2.
+                Set 90-day targets, persist them locally, and compare them against live metrics.
               </p>
             </div>
 
@@ -302,7 +473,14 @@ export default function Core4Page() {
                     [field.metric]: e.target.value,
                   }))}
                 />
-                <Button type="button" onClick={() => setTarget(field.metric, draftTargets[field.metric].trim())}>
+                <Button type="button" onClick={() => {
+                  const nextValue = draftTargets[field.metric].trim();
+                  setDraftTargets((current) => ({
+                    ...current,
+                    [field.metric]: nextValue,
+                  }));
+                  setTarget(field.metric, nextValue);
+                }}>
                   Save
                 </Button>
                 <Button type="button" variant="secondary" onClick={() => {
@@ -311,6 +489,50 @@ export default function Core4Page() {
                     [field.metric]: '',
                   }));
                   clearTarget(field.metric);
+                }}>
+                  Clear
+                </Button>
+              </div>
+            ))}
+          </div>
+
+          <div className="border-t border-outline pt-6 space-y-6">
+            <div>
+              <h3 className="font-headline font-bold uppercase tracking-widest text-xs text-on-surface mb-1">
+                Current Values
+              </h3>
+              <p className="font-mono text-[9px] uppercase tracking-widest text-on-surface/30">
+                Manual tracking for Flow, Family, and Finance. Progress is current divided by target.
+              </p>
+            </div>
+
+            {currentValueFields.map((field) => (
+              <div key={field.metric} className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto_auto] gap-3 items-end">
+                <Input
+                  label={field.label}
+                  placeholder={field.placeholder}
+                  value={draftCurrentValues[field.metric]}
+                  onChange={(e) => setDraftCurrentValues((current) => ({
+                    ...current,
+                    [field.metric]: e.target.value,
+                  }))}
+                />
+                <Button type="button" onClick={() => {
+                  const nextValue = draftCurrentValues[field.metric].trim();
+                  setDraftCurrentValues((current) => ({
+                    ...current,
+                    [field.metric]: nextValue,
+                  }));
+                  setCurrentValue(field.metric, nextValue);
+                }}>
+                  Save
+                </Button>
+                <Button type="button" variant="secondary" onClick={() => {
+                  setDraftCurrentValues((current) => ({
+                    ...current,
+                    [field.metric]: '',
+                  }));
+                  clearCurrentValue(field.metric);
                 }}>
                   Clear
                 </Button>
