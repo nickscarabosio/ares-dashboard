@@ -26,8 +26,8 @@ export const Core4Grid: React.FC<Core4GridProps> = ({ data, targets, fitnessDeta
           progress={metric.progress}
           status={metric.status}
           color={metric.color}
-          showTarget={metric.title !== 'Fitness'}
-          target={metric.title === 'Fitness' ? null : targets?.[metric.title.toLowerCase() as keyof Core4Targets] ?? null}
+          showTarget
+          target={targets?.[metric.title.toLowerCase() as keyof Core4Targets] ?? null}
           details={metric.title === 'Fitness' ? fitnessDetails : undefined}
           onClick={() => onCardClick?.(metric)}
         />

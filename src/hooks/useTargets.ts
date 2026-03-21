@@ -2,9 +2,10 @@
 
 import { useState } from 'react';
 
-export type TargetMetric = 'flow' | 'family' | 'finance';
+export type TargetMetric = 'fitness' | 'flow' | 'family' | 'finance';
 
 export interface Core4Targets {
+  fitness: string | null;
   flow: string | null;
   family: string | null;
   finance: string | null;
@@ -13,6 +14,7 @@ export interface Core4Targets {
 const TARGETS_STORAGE_KEY = 'core4_targets';
 
 const DEFAULT_TARGETS: Core4Targets = {
+  fitness: null,
   flow: null,
   family: null,
   finance: null,
@@ -26,6 +28,7 @@ function parseTargets(value: string | null): Core4Targets {
   try {
     const parsed = JSON.parse(value) as Partial<Core4Targets>;
     return {
+      fitness: parsed.fitness ?? null,
       flow: parsed.flow ?? null,
       family: parsed.family ?? null,
       finance: parsed.finance ?? null,

@@ -93,17 +93,6 @@ export const Core4Card: React.FC<Core4CardProps> = ({
       </div>
 
       <div className="mt-5 space-y-2">
-        {showTarget && (
-          <div className="flex items-center justify-between gap-3">
-            <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-on-surface/30">
-              Target
-            </span>
-            <span className="font-mono text-[10px] uppercase tracking-widest text-on-surface/60 text-right">
-              {target || 'Set target'}
-            </span>
-          </div>
-        )}
-
         {details.length > 0 && (
           <div className="border-t border-outline/60 pt-3 space-y-2">
             {details.map((detail) => (
@@ -116,6 +105,17 @@ export const Core4Card: React.FC<Core4CardProps> = ({
                 </span>
               </div>
             ))}
+          </div>
+        )}
+
+        {showTarget && (
+          <div className="flex items-center justify-between gap-3">
+            <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-on-surface/30">
+              Target
+            </span>
+            <span className="font-mono text-[10px] uppercase tracking-widest text-on-surface/60 text-right">
+              {target || 'Set target'}
+            </span>
           </div>
         )}
       </div>

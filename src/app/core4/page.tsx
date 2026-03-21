@@ -179,6 +179,7 @@ export default function Core4Page() {
   const { bodyweight, saveBodyweight, clearBodyweight } = useBodyweight();
   const [, setSelectedMetric] = useState<string | null>(null);
   const [draftTargets, setDraftTargets] = useState<Record<TargetMetric, string>>({
+    fitness: targets.fitness ?? '',
     flow: targets.flow ?? '',
     family: targets.family ?? '',
     finance: targets.finance ?? '',
@@ -211,6 +212,7 @@ export default function Core4Page() {
     label: string;
     placeholder: string;
   }> = [
+    { metric: 'fitness', label: 'Set 90-day Fitness target', placeholder: '7.5 daily strain' },
     { metric: 'flow', label: 'Flow target', placeholder: '50 Flow tasks' },
     { metric: 'family', label: 'Family target', placeholder: '3x family dinners/week' },
     { metric: 'finance', label: 'Finance target', placeholder: '$500K ARR' },
