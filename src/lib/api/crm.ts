@@ -105,7 +105,7 @@ export async function updateDeal(dealId: string, updates: Partial<Deal>): Promis
 
 export async function moveDealStage(dealId: string, newStageId: string, notes?: string): Promise<Deal> {
   return updateDeal(dealId, {
-    pipeline_stage_id: newStageId,
+    stage: { id: newStageId } as any,
     notes: notes || undefined,
   });
 }
