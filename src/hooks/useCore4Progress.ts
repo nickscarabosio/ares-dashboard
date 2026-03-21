@@ -11,7 +11,7 @@ export interface Core4ProgressDetail {
 }
 
 export interface Core4ProgressResult {
-  value: number;
+  value: string | number;
   valueLabel: string;
   unit: string;
   progress: number;
@@ -50,8 +50,8 @@ function parseNumericValue(rawValue: string | null | undefined): number | null {
   return parsedValue * multiplier;
 }
 
-function calculateProgress(current: number, target: number | null): number {
-  if (!target || target <= 0) {
+function calculateProgress(current: number | null, target: number | null): number {
+  if (current === null || !target || target <= 0) {
     return 0;
   }
 
@@ -89,12 +89,13 @@ export function useCore4Progress(
   const numericTarget = parseNumericValue(target);
 
   if (metric === 'fitness') {
-    const currentValue = Number.parseFloat(whoop.strain);
-    const progress = calculateProgress(Number.isFinite(currentValue) ? currentValue : 0, numericTarget);
+    const liveStrain = Number.parseFloat(whoop.strain);
+    const resolvedStrain = Number.isFinite(liveStrain) ? liveStrain : null;
+    const progress = calculateProgress(resolvedStrain, numericTarget);
     const status = resolveStatus(progress);
 
     return {
-      value: Number.isFinite(currentValue) ? currentValue : 0,
+      value: resolvedStrain ?? 0,
       valueLabel: whoop.isLoading ? '—' : whoop.strain,
       unit: 'strain',
       progress,
@@ -111,15 +112,19 @@ export function useCore4Progress(
   }
 
   const numericCurrentValue = parseNumericValue(currentValue);
-  const resolvedCurrentValue = numericCurrentValue ?? 0;
-  const progress = calculateProgress(resolvedCurrentValue, numericTarget);
+  const progress = calculateProgress(numericCurrentValue, numericTarget);
   const status = resolveStatus(progress);
   const isFinance = metric === 'finance';
-  const formattedCurrentValue = isFinance ? formatCurrency(resolvedCurrentValue) : String(resolvedCurrentValue);
+  const formattedCurrentValue =
+    numericCurrentValue === null
+      ? '—'
+      : isFinance
+        ? formatCurrency(numericCurrentValue)
+        : String(numericCurrentValue);
   const unit = metric === 'flow' ? 'points' : metric === 'family' ? 'moments' : '';
 
   return {
-    value: resolvedCurrentValue,
+    value: numericCurrentValue ?? '—',
     valueLabel: formattedCurrentValue,
     unit,
     progress,

@@ -10,7 +10,6 @@ export interface Core4CardProps {
   value: string | number;
   unit: string;
   progress: number;
-  status?: 'active' | 'idle' | 'offline';
   color?: 'red' | 'yellow' | 'green';
   statusLabel?: string;
   index?: number;
@@ -41,6 +40,7 @@ export const Core4Card: React.FC<Core4CardProps> = ({
 }) => {
   const idx = INDEX_MAP[title] || '00';
   const clampedProgress = Math.max(0, Math.min(progress, 100));
+  const progressLabel = `${Math.max(0, Math.round(progress))}%`;
   const tone =
     color === 'green'
       ? {
@@ -69,11 +69,11 @@ export const Core4Card: React.FC<Core4CardProps> = ({
       onClick={onClick}
       role="button"
       tabIndex={0}
-      aria-label={`${title}: ${value} ${unit}`}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            onClick?.();
+      aria-label={`${title}: ${value}${unit ? ` ${unit}` : ''}`}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick?.();
         }
       }}
     >
@@ -119,7 +119,7 @@ export const Core4Card: React.FC<Core4CardProps> = ({
             Progress
           </span>
           <span className={`font-mono text-[10px] uppercase tracking-widest text-right ${tone.statusColor}`}>
-            {progress}%
+            {progressLabel}
           </span>
         </div>
 

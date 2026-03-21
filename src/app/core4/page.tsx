@@ -458,7 +458,7 @@ export default function Core4Page() {
                 90 Day Targets
               </h3>
               <p className="font-mono text-[9px] uppercase tracking-widest text-on-surface/30">
-                Set 90-day targets, persist them locally, and compare them against live metrics.
+                Set 90-day targets and persist them locally. Fitness stays on WHOOP, the other three are manual.
               </p>
             </div>
 
@@ -502,7 +502,7 @@ export default function Core4Page() {
                 Current Values
               </h3>
               <p className="font-mono text-[9px] uppercase tracking-widest text-on-surface/30">
-                Manual tracking for Flow, Family, and Finance. Progress is current divided by target.
+                Manual tracking for Flow, Family, and Finance. Progress is current divided by target, stored in local browser state.
               </p>
             </div>
 
