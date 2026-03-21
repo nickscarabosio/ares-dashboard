@@ -26,8 +26,7 @@ function getCRMToken(): string {
 
 export async function fetchDeals(status?: string, stage?: string): Promise<Deal[]> {
   try {
-    const token = getCRMToken();
-    const baseUrl = 'https://crm.nickscarabosio.com/api/deals';
+    const baseUrl = '/api/deals';
 
     const params = new URLSearchParams();
     if (status) params.append('status', status);
@@ -37,7 +36,6 @@ export async function fetchDeals(status?: string, stage?: string): Promise<Deal[
 
     const response = await fetch(url, {
       headers: {
-        'Authorization': `Bearer ${token}`,
         'Accept': 'application/json',
       },
     });
