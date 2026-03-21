@@ -1,13 +1,16 @@
 import React from 'react';
-import { Core4Card } from './Core4Card';
+import { Core4Card, type Core4CardDetail } from './Core4Card';
 import type { Core4Metric } from '@/lib/mockData';
+import type { Core4Targets } from '@/hooks';
 
 export interface Core4GridProps {
   data?: Core4Metric[];
+  targets?: Core4Targets;
+  fitnessDetails?: Core4CardDetail[];
   onCardClick?: (metric: Core4Metric) => void;
 }
 
-export const Core4Grid: React.FC<Core4GridProps> = ({ data, onCardClick }) => {
+export const Core4Grid: React.FC<Core4GridProps> = ({ data, targets, fitnessDetails, onCardClick }) => {
   if (!data || data.length === 0) {
     return null;
   }
@@ -23,6 +26,9 @@ export const Core4Grid: React.FC<Core4GridProps> = ({ data, onCardClick }) => {
           progress={metric.progress}
           status={metric.status}
           color={metric.color}
+          showTarget={metric.title !== 'Fitness'}
+          target={metric.title === 'Fitness' ? null : targets?.[metric.title.toLowerCase() as keyof Core4Targets] ?? null}
+          details={metric.title === 'Fitness' ? fitnessDetails : undefined}
           onClick={() => onCardClick?.(metric)}
         />
       ))}

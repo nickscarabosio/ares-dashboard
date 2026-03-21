@@ -1,5 +1,10 @@
 import React from 'react';
 
+export interface Core4CardDetail {
+  label: string;
+  value: string;
+}
+
 export interface Core4CardProps {
   title: 'Fitness' | 'Flow' | 'Family' | 'Finance';
   value: string | number;
@@ -8,6 +13,9 @@ export interface Core4CardProps {
   status: 'active' | 'idle' | 'offline';
   color?: 'red' | 'yellow' | 'green';
   index?: number;
+  showTarget?: boolean;
+  target?: string | null;
+  details?: Core4CardDetail[];
   onClick?: () => void;
 }
 
@@ -24,6 +32,9 @@ export const Core4Card: React.FC<Core4CardProps> = ({
   unit,
   progress,
   color,
+  showTarget = true,
+  target,
+  details = [],
   onClick,
 }) => {
   const idx = INDEX_MAP[title] || '00';
@@ -38,16 +49,18 @@ export const Core4Card: React.FC<Core4CardProps> = ({
       role="button"
       tabIndex={0}
       aria-label={`${title}: ${value} ${unit}`}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          onClick?.();
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onClick?.();
         }
       }}
     >
       <div className="flex justify-between items-start mb-6">
         <h3 className="font-mono font-bold uppercase tracking-widest text-[10px] text-on-surface/50">
-          {idx} // {title}
+          {idx}
+          {' // '}
+          {title}
         </h3>
         <div className={`w-2 h-2 ${pipColor}`} />
       </div>
@@ -77,6 +90,34 @@ export const Core4Card: React.FC<Core4CardProps> = ({
           className={`h-full ${isMint ? 'bg-clinical-mint shadow-[0_0_10px_#9ee9d3]' : 'bg-primary shadow-[0_0_10px_#FF1744]'}`}
           style={{ width: `${Math.max(0, Math.min(progress, 100))}%` }}
         />
+      </div>
+
+      <div className="mt-5 space-y-2">
+        {showTarget && (
+          <div className="flex items-center justify-between gap-3">
+            <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-on-surface/30">
+              Target
+            </span>
+            <span className="font-mono text-[10px] uppercase tracking-widest text-on-surface/60 text-right">
+              {target || 'Set target'}
+            </span>
+          </div>
+        )}
+
+        {details.length > 0 && (
+          <div className="border-t border-outline/60 pt-3 space-y-2">
+            {details.map((detail) => (
+              <div key={detail.label} className="flex items-center justify-between gap-3">
+                <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-on-surface/30">
+                  {detail.label}
+                </span>
+                <span className="font-mono text-[10px] uppercase tracking-widest text-on-surface/70 text-right">
+                  {detail.value}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
