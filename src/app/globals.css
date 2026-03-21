@@ -1,26 +1,73 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&family=Inter:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600;700&display=swap');
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-primary: #FF1744;
+  --color-primary-dim: #920021;
+  --color-background: #050609;
+  --color-surface-0: #0a0c12;
+  --color-surface-1: #080a0f;
+  --color-surface-2: #0c0e14;
+  --color-surface-3: #11141d;
+  --color-surface-high: #0d1017;
+  --color-on-surface: #ccd2e3;
+  --color-on-surface-bright: #f8fafc;
+  --color-outline: #2a2f3d;
+  --color-outline-dim: #1e293b;
+  --color-clinical-mint: #9ee9d3;
+  --color-metallic-gold: #b5a67c;
+
+  --font-family-headline: 'Space Grotesk', sans-serif;
+  --font-family-body: 'Inter', sans-serif;
+  --font-family-mono: 'IBM Plex Mono', monospace;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Tactical Utilities */
+.ares-glow {
+  box-shadow: 0 0 25px rgba(255, 23, 68, 0.7), inset 0 0 10px rgba(255, 23, 68, 0.4);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.text-glow {
+  text-shadow: 0 0 12px rgba(255, 23, 68, 0.8);
 }
 
+.clinical-glow {
+  box-shadow: 0 0 10px rgba(158, 233, 211, 0.3);
+}
+
+.ghost-border {
+  border: 1px solid rgba(255, 23, 68, 0.2);
+}
+
+.pip-glow {
+  box-shadow: 0 0 12px #FF1744;
+}
+
+.hud-text {
+  letter-spacing: 0.15em;
+  font-weight: 700;
+}
+
+.glass-hud {
+  background: rgba(5, 6, 9, 0.85);
+  backdrop-filter: blur(25px);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: #050609; }
+::-webkit-scrollbar-thumb { background: #FF1744; }
+
+/* Selection */
+::selection {
+  background: #FF1744;
+  color: black;
+}
+
+/* Base */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: #050609;
+  color: #ccd2e3;
+  font-family: 'IBM Plex Mono', monospace;
+  -webkit-font-smoothing: antialiased;
 }
