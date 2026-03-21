@@ -52,9 +52,12 @@ export function useCRMDeals(): UseCRMDealsResult {
 
   const dealsByStage: Record<string, Deal[]> = {};
   if (data) {
-    const stages = ['Inquiry', 'Qualified', 'Proposal', 'Won'];
-    stages.forEach(stage => {
-      dealsByStage[stage] = data.filter(d => d.stage === stage || d.pipeline_stage_id === stage);
+    data.forEach(deal => {
+      const stageLabel = deal.stage?.label || 'Unknown';
+      if (!dealsByStage[stageLabel]) {
+        dealsByStage[stageLabel] = [];
+      }
+      dealsByStage[stageLabel].push(deal);
     });
   }
 

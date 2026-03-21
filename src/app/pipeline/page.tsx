@@ -30,7 +30,7 @@ const DealDetailPanel: React.FC<{ deal: Deal | null; onClose: () => void }> = ({
             DATA_ENTRY // INTEL-{deal.id?.slice(-4) || '0000'}
           </span>
           <h2 id="deal-detail-title" className="font-headline text-3xl font-black uppercase tracking-tight text-on-surface-bright leading-tight">
-            {deal.name}
+            {deal.title}
           </h2>
         </div>
         <button
@@ -47,7 +47,7 @@ const DealDetailPanel: React.FC<{ deal: Deal | null; onClose: () => void }> = ({
         <div className="grid grid-cols-2 gap-[2px] bg-on-surface/5">
           <div className="p-4 bg-background">
             <div className="text-[8px] uppercase font-mono text-on-surface/30 mb-2 tracking-[0.2em]">STAGE</div>
-            <div className="text-[11px] font-black text-on-surface uppercase tracking-widest">{deal.stage}</div>
+            <div className="text-[11px] font-black text-on-surface uppercase tracking-widest">{deal.stage?.label}</div>
           </div>
           <div className="p-4 bg-background">
             <div className="text-[8px] uppercase font-mono text-on-surface/30 mb-2 tracking-[0.2em]">STATUS</div>
@@ -56,21 +56,21 @@ const DealDetailPanel: React.FC<{ deal: Deal | null; onClose: () => void }> = ({
         </div>
 
         <div className="bg-background p-4">
-          <div className="text-[8px] uppercase font-mono text-on-surface/30 mb-2 tracking-[0.2em]">ASSET_VALUE</div>
-          <div className="font-mono text-2xl font-bold text-primary tracking-tighter">${deal.value.toLocaleString()}</div>
+          <div className="text-[8px] uppercase font-mono text-on-surface/30 mb-2 tracking-[0.2em]">WEIGHT</div>
+          <div className="font-mono text-2xl font-bold text-primary tracking-tighter">{deal.value}%</div>
         </div>
 
-        {deal.company && (
+        {deal.owner && (
           <div className="bg-background p-4">
             <div className="text-[8px] uppercase font-mono text-on-surface/30 mb-2 tracking-[0.2em]">ENTITY</div>
-            <div className="text-[11px] font-bold text-on-surface uppercase tracking-widest">{deal.company}</div>
+            <div className="text-[11px] font-bold text-on-surface uppercase tracking-widest">{deal.owner}</div>
           </div>
         )}
 
-        {deal.contact_email && (
+        {deal.email && (
           <div className="bg-background p-4">
             <div className="text-[8px] uppercase font-mono text-on-surface/30 mb-2 tracking-[0.2em]">CONTACT_NODE</div>
-            <div className="text-[11px] text-on-surface/60 font-mono tracking-wide">{deal.contact_email}</div>
+            <div className="text-[11px] text-on-surface/60 font-mono tracking-wide">{deal.email}</div>
           </div>
         )}
 
@@ -173,17 +173,17 @@ export default function PipelinePage() {
                         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedDealId(deal.id); } }}
                         role="button"
                         tabIndex={0}
-                        aria-label={`${deal.name}, $${(deal.value / 1000).toFixed(0)}K`}
+                        aria-label={`${deal.title}, ${deal.value}%`}
                       >
                         <div className="text-[9px] font-mono text-primary/60 uppercase tracking-widest mb-1">
                           ID: {deal.id?.slice(0, 8) || 'N/A'}
                         </div>
                         <h4 className="font-bold text-on-surface uppercase mb-4 text-xs tracking-wider">
-                          {deal.name}
+                          {deal.title}
                         </h4>
                         <div className="flex justify-between items-end">
                           <div className="font-mono text-lg font-bold text-on-surface/80 tracking-tighter">
-                            ${deal.value.toLocaleString()}
+                            {deal.value}%
                           </div>
                         </div>
                       </div>

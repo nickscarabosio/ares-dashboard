@@ -1,14 +1,21 @@
 export interface Deal {
   id: string;
-  name: string;
-  company?: string;
+  title: string;
+  owner: string;
   value: number;
-  pipeline_stage_id: string;
-  stage: string;
+  stage: {
+    id: string;
+    label: string;
+    weight: number;
+    color: string;
+  };
   status: string;
-  contact_email?: string;
+  email?: string;
   followUpDate?: string;
   notes?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  goal?: string | null;
 }
 
 export interface PipelineStage {
