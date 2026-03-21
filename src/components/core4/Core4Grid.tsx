@@ -24,7 +24,6 @@ export const Core4Grid: React.FC<Core4GridProps> = ({ data, targets, fitnessDeta
           value={metric.value}
           unit={metric.unit}
           progress={metric.progress}
-          status={metric.status}
           color={metric.color}
           showTarget
           target={targets?.[metric.title.toLowerCase() as keyof Core4Targets] ?? null}
