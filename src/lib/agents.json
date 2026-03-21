@@ -1,0 +1,103 @@
+{
+  "agents": [
+    {
+      "id": "casper",
+      "name": "Casper",
+      "role": "Chief of Staff",
+      "reportsTo": null,
+      "description": "Telegram orchestrator, memory synthesis, scheduling, routing.",
+      "lastDeployed": "2026-03-21T05:40:00Z",
+      "type": "system"
+    },
+    {
+      "id": "forge",
+      "name": "Forge",
+      "role": "Builder",
+      "reportsTo": "casper",
+      "description": "Full-stack engineering, builds, fixes, deploys, PR flow.",
+      "lastDeployed": "2026-03-21T05:44:00Z",
+      "type": "builder"
+    },
+    {
+      "id": "jeeves",
+      "name": "Jeeves",
+      "role": "Email Triage",
+      "reportsTo": "casper",
+      "description": "Email classification, calendar hygiene, operational follow-up.",
+      "lastDeployed": "2026-03-21T06:05:00Z",
+      "type": "automation"
+    },
+    {
+      "id": "mercury",
+      "name": "Mercury",
+      "role": "RevOps Analyst",
+      "reportsTo": "casper",
+      "description": "Pipeline snapshots, CRM hygiene, SLA enforcement, forecasting.",
+      "lastDeployed": "2026-03-21T05:52:00Z",
+      "type": "analytics"
+    },
+    {
+      "id": "arnold",
+      "name": "Arnold",
+      "role": "Health Tracker",
+      "reportsTo": "casper",
+      "description": "WHOOP sync, macro tracking, training recommendations, daily brief.",
+      "lastDeployed": "2026-03-21T05:35:00Z",
+      "type": "personal"
+    },
+    {
+      "id": "shaman",
+      "name": "Shaman",
+      "role": "Reflection Guide",
+      "reportsTo": "casper",
+      "description": "Readings, reflection prompts, decision pattern support.",
+      "lastDeployed": "2026-03-21T05:36:00Z",
+      "type": "personal"
+    },
+    {
+      "id": "scout",
+      "name": "Scout",
+      "role": "QA Scout",
+      "reportsTo": "forge",
+      "description": "Acceptance testing, verification, pass/fail reporting to Forge.",
+      "lastDeployed": "2026-03-21T05:48:00Z",
+      "type": "qa"
+    },
+    {
+      "id": "poe",
+      "name": "Poe",
+      "role": "Content Writer",
+      "reportsTo": "casper",
+      "description": "Drafts posts, blogs, imagery requests, content approvals.",
+      "lastDeployed": "2026-03-21T05:33:00Z",
+      "type": "creative"
+    },
+    {
+      "id": "atlas",
+      "name": "Atlas",
+      "role": "SEO Strategist",
+      "reportsTo": "casper",
+      "description": "Pillar pages, SEO audits, internal linking, publishing pipeline.",
+      "lastDeployed": "2026-03-21T05:31:00Z",
+      "type": "growth"
+    },
+    {
+      "id": "arc",
+      "name": "Arc",
+      "role": "Skill Architect",
+      "reportsTo": "casper",
+      "description": "Designs and refactors skills, triggers, and agent capabilities.",
+      "lastDeployed": "2026-03-21T05:26:00Z",
+      "type": "utility"
+    },
+    {
+      "id": "fathom",
+      "name": "Fathom",
+      "role": "Meeting Intel",
+      "reportsTo": "jeeves",
+      "description": "Meeting transcript routing, action extraction, project signals.",
+      "lastDeployed": "2026-03-21T05:20:00Z",
+      "type": "utility"
+    }
+  ]
+}
